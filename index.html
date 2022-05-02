@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script
+      src="https://unpkg.com/obniz@3.19.0/obniz.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div id="obniz-debug"></div>
+    <h3>ねこボット</h3>
+    <button class="btn btn-primary" id="on">動かす(上)</button>
+    <div>　</div>
+    <button class="btn btn-primary" id="off">動かす(下)</button>
+    <div>　</div>
+    <button class="btn btn-primary" id="auto">オート(2回)</button>
+    <div>　</div>
+    <div class="form-group">
+      <label for="power-range">パワー: </label><span id="power-text">50</span>
+      <input type="range" class="form-control-range" id="power-range" value="50" min="40" max="80" step="5">
+    </div>
+
+    <script>
+      var obniz = new Obniz("XXXX-XXXX");
+      const power_range     = document.getElementById('power-range');
+      const power_text      = document.getElementById('power-text');
+
+      power_range.addEventListener('change',function(){
+        document.getElementById('power-text').textContent = power_range.value;
+      });
+
+      obniz.onconnect = async function() {
+        var motor = obniz.wired("DCMotor", {forward:0, back:1});
+
+        obniz.switch.onchange = function(state) {
+          obniz.display.clear();
+          obniz.display.print(state);
+        };
+
+        $("#on").click(function() {
+          motor.power(power_range.value); 
+          motor.forward();
+          setTimeout(function(){
+            motor.stop();
+            obniz.display.clear();
+            obniz.display.print("STOPPED");
+          }, 1000);
+          obniz.display.clear();
+          obniz.display.print("FORWARD");
+        });
+
+        $("#off").click(function() {
+          motor.power(power_range.value); 
+          motor.reverse();
+          setTimeout(function(){
+            motor.stop();
+            obniz.display.clear();
+            obniz.display.print("STOPPED");
+          }, 1000);
+          obniz.display.clear();
+          obniz.display.print("REVERSE");
+        });
+
+        $("#auto").click(function() {
+          motor.power(power_range.value); 
+          obniz.display.clear();
+          obniz.display.print("AUTO");
+          motor.forward();
+          obniz.wait(1000);
+          motor.stop();
+          obniz.wait(100);
+          motor.reverse();
+          obniz.wait(1000);
+          motor.stop();
+          setTimeout(function(){
+            motor.stop();
+            obniz.display.clear();
+            obniz.display.print("STOPPED");
+          }, 2200);
+        });
+
+      };
+    </script>
+  </body>
+</html>
